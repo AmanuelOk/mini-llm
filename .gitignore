@@ -1,3 +1,4 @@
 .DS_Store
 minigpt/__pycache__/
-checkpoints/latest.pt
+checkpoints/
+data/

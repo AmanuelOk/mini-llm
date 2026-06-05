@@ -47,11 +47,28 @@ def generate(model, idx, max_new_tokens):
 # tokenizer = load_tokenizer("checkpoints/tokenizer.json")
 tokenizer = SPTokenizer("checkpoints/spm.model")
 while(True):
+    stop_texts = ["### User", "---", "# Example", "Instruction:", "Input:", "Output:"]
     input_text = input("Enter a prompt: ")
     prompt_text = input_text if input_text else "who are you?"
-    start = torch.tensor([tokenizer.encode(prompt_text)]).to(DEVICE)
+
+    prompt = f"""### User\n
+
+          {prompt_text}\n
+
+          ### Assistant\n
+          
+            """
+    start = torch.tensor([tokenizer.encode(prompt, add_bos=True)]).to(DEVICE)
 
     out = generate(model, start, 50)
     # tokenizer = load_tokenizer("checkpoints/tokenizer.json")
+    text = tokenizer.decode(out[0].tolist())
 
-    print(tokenizer.decode(out[0].tolist()))
+    for stop in [
+        "<eos>",
+    ]:
+        if stop in text:
+            text = text.split(stop)[0]
+
+    print(text)
+  
