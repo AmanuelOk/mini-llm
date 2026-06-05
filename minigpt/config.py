@@ -1,6 +1,6 @@
 # config.py
 
-VOCAB_SIZE = 32000
+VOCAB_SIZE = 1200
 BLOCK_SIZE = 128
 
 D_MODEL = 256

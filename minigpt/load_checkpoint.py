@@ -2,6 +2,7 @@ import torch
 from model import MiniGPT
 from config import *
 from tokenizer import CharTokenizer, load_tokenizer
+from spm_tokenizer import SPTokenizer
 
 model = MiniGPT(
     VOCAB_SIZE,
@@ -43,12 +44,14 @@ def generate(model, idx, max_new_tokens):
 
 
 # ✅ LOAD SAME TOKENIZER USED IN TRAINING
-tokenizer = load_tokenizer("checkpoints/tokenizer.json")
+# tokenizer = load_tokenizer("checkpoints/tokenizer.json")
+tokenizer = SPTokenizer("checkpoints/spm.model")
 while(True):
     input_text = input("Enter a prompt: ")
     prompt_text = input_text if input_text else "who are you?"
     start = torch.tensor([tokenizer.encode(prompt_text)]).to(DEVICE)
 
     out = generate(model, start, 50)
-    tokenizer = load_tokenizer("checkpoints/tokenizer.json")
+    # tokenizer = load_tokenizer("checkpoints/tokenizer.json")
+
     print(tokenizer.decode(out[0].tolist()))

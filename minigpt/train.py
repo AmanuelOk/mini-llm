@@ -4,6 +4,7 @@ from config import *
 from dataloader import get_dataloader
 from dataset import GPTDataset
 from tokenizer import CharTokenizer
+from spm_tokenizer import SPTokenizer
 import os
 import torch
 import json
@@ -19,16 +20,17 @@ model = MiniGPT(
 ).to(DEVICE)
 
 optimizer = torch.optim.AdamW(model.parameters(), lr=LR)
-text = open("data/data.jsonl").read()
+text = open("data/spm_50000.txt").read()
 
-tokenizer = CharTokenizer(text)
+# tokenizer = CharTokenizer(text)
 
-with open("checkpoints/tokenizer.json", "w") as f:
-    json.dump({
-        "stoi": tokenizer.stoi,
-        "itos": {str(k): v for k, v in tokenizer.itos.items()}
-    }, f)
+# with open("checkpoints/tokenizer.json", "w") as f:
+#     json.dump({
+#         "stoi": tokenizer.stoi,
+#         "itos": {str(k): v for k, v in tokenizer.itos.items()}
+#     }, f)
 
+tokenizer = SPTokenizer()
 loader = get_dataloader(
     text=text,
     tokenizer=tokenizer,
@@ -36,7 +38,7 @@ loader = get_dataloader(
     batch_size=16
 )
 
-checkpoint_path = "checkpoints/minigpt_step_500.pt"
+checkpoint_path = "checkpoints/latest.pt"
 if os.path.exists(checkpoint_path):
 
     checkpoint = torch.load(checkpoint_path)
@@ -86,10 +88,10 @@ for step, (x, y) in enumerate(loader):
         "step": step,
         "model_state_dict": model.state_dict(),
         "optimizer_state_dict": optimizer.state_dict(),
-        "tokenizer": {
-            "stoi": tokenizer.stoi,
-            "itos": tokenizer.itos
-        },
+        # "tokenizer": {
+        #     "stoi": tokenizer.stoi,
+        #     "itos": tokenizer.itos
+        # },
         "loss": loss_val
                  }, "checkpoints/latest.pt")
 
