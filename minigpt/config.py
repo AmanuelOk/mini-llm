@@ -1,0 +1,14 @@
+# config.py
+
+VOCAB_SIZE = 32000
+BLOCK_SIZE = 128
+
+D_MODEL = 256
+N_HEADS = 4
+N_LAYERS = 4
+
+DROPOUT = 0.1
+
+BATCH_SIZE = 16
+LR = 3e-4
+DEVICE = "cpu"  # or "cpu"
