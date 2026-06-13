@@ -12,11 +12,11 @@ model = MiniGPT(
     N_LAYERS
 ).to(DEVICE)
 
-checkpoint = torch.load("checkpoints/tigrinya/latest.pt", map_location="cpu")
+checkpoint = torch.load("checkpoints/tigrinya/best.pt", map_location="cpu")
 model.load_state_dict(checkpoint["model_state_dict"])
 model.eval()
 
-def generate(model, idx, max_new_tokens, eos_id, temperature=0.8, top_k=50):
+def generate(model, idx, max_new_tokens, temperature=0.8, top_k=50):
     for _ in range(max_new_tokens):
         idx_cond = idx[:, -BLOCK_SIZE:]
 
@@ -36,9 +36,7 @@ def generate(model, idx, max_new_tokens, eos_id, temperature=0.8, top_k=50):
             -1,
             torch.multinomial(probs, 1)
         )
-        # Stop when EOS is generated 
-        if next_token.item() == eos_id: 
-            break
+
         idx = torch.cat([idx, next_token], dim=1)
 
     return idx
@@ -47,29 +45,15 @@ def generate(model, idx, max_new_tokens, eos_id, temperature=0.8, top_k=50):
 
 # ✅ LOAD SAME TOKENIZER USED IN TRAINING
 tokenizer = SPTokenizer("checkpoints/tigrinya/spm.model")
-eos_id = tokenizer.sp.eos_id()
 while(True):
    
     input_text = input("Enter a prompt: ")
-    prompt_text = input_text if input_text else "Explain machine learning."
+    prompt_text = input_text if input_text else "ብሉይን ሓድሽን ኪዳን"
 
-    prompt = f"""### User
-    {prompt_text}
 
-    ### Assistant
-    """
-    start = torch.tensor([tokenizer.encode(prompt, add_bos=True)]).to(DEVICE)
+    start = torch.tensor([tokenizer.encode(prompt_text, add_bos=True)]).to(DEVICE)
 
-    # print(tokenizer.sp.id_to_piece(eos_id))
-
-    out = generate(model, start, 200, eos_id=eos_id)
+    out = generate(model, start, 50)
     text = tokenizer.decode(out[0].tolist())
 
-    for stop in [
-        "<eos>","<sos>"
-    ]:
-        if stop in text:
-            text = text.split(stop)[0]
-
     print(f'{text}')
-  

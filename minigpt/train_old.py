@@ -89,6 +89,6 @@ for step, (x, y) in enumerate(loader):
         "model_state_dict": model.state_dict(),
         "optimizer_state_dict": optimizer.state_dict(),
         "loss": loss_val
-                 }, "checkpoints/latest.pt")
+                 }, "checkpoints/tigrinya/latest.pt")
 
         print(f"Saved checkpoint at step {step}")

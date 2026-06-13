@@ -6,9 +6,9 @@ from config import *
 from dataloader import get_dataloader
 from spm_tokenizer import SPTokenizer
 
-os.makedirs("checkpoints", exist_ok=True)
+os.makedirs("checkpoints/tigrinya", exist_ok=True)
 
-tokenizer = SPTokenizer("checkpoints/spm.model")
+tokenizer = SPTokenizer("checkpoints/tigrinya/spm.model")
 
 model = MiniGPT(
     tokenizer.vocab_size,
@@ -20,16 +20,16 @@ model = MiniGPT(
 
 optimizer = torch.optim.AdamW(model.parameters(), lr=LR)
 
-text = open("data/spm_50000.txt", "r", encoding="utf-8").read()
+text = open("data/tigrinya.txt", "r", encoding="utf-8").read()
 
-loader = get_dataloader(
-    text=text,
-    tokenizer=tokenizer,
-    block_size=BLOCK_SIZE,
-    batch_size=BATCH_SIZE
-)
+# loader = get_dataloader(
+#     text=text,
+#     tokenizer=tokenizer,
+#     block_size=BLOCK_SIZE,
+#     batch_size=BATCH_SIZE
+# )
 
-checkpoint_path = "checkpoints/latest.pt"
+checkpoint_path = "checkpoints/tigrinya/latest.pt"
 
 start_step = 0
 
@@ -47,7 +47,13 @@ best_loss = float("inf")
 step = start_step
 
 while step < MAX_STEPS:
-    for x, y in loader:
+    train_loader = get_dataloader(
+    text,
+    tokenizer,
+    BLOCK_SIZE,
+    BATCH_SIZE
+)
+    for x, y in train_loader:
         x, y = x.to(DEVICE), y.to(DEVICE)
 
         logits, loss = model(x, y)
@@ -70,7 +76,7 @@ while step < MAX_STEPS:
                 "loss": loss_val,
                 "vocab_size": tokenizer.vocab_size,
                 "block_size": BLOCK_SIZE,
-            }, "checkpoints/latest.pt")
+            }, "checkpoints/tigrinya/latest.pt")
 
             print(f"Saved checkpoint at step {step}")
 

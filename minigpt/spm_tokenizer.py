@@ -1,7 +1,7 @@
 import sentencepiece as spm
 
 class SPTokenizer:
-    def __init__(self, model_path="checkpoints/spm.model"):
+    def __init__(self, model_path="checkpoints/tigrinya/spm.model"):
         self.sp = spm.SentencePieceProcessor()
         self.sp.load(model_path)
 
