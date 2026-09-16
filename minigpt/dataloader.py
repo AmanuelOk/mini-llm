@@ -3,20 +3,11 @@ from dataset import GPTDataset
 from dataset import collate_fn
 import random
 
-def get_dataloader(text, tokenizer, block_size, batch_size):
+def get_dataloader(examples, tokenizer, block_size, batch_size):
 
-    examples = text.split("<eos>")
-
-    examples = [
-        ex.strip() + " <eos>"
-        for ex in examples
-        if ex.strip()
-    ]
-
-    random.shuffle(examples)
-
-    shuffled_text = "\n".join(examples)
-
+    shuffled_text = "\n\n".join(examples)
+    print(shuffled_text)
+    
     dataset = GPTDataset(shuffled_text, tokenizer, block_size)
 
     loader = DataLoader(

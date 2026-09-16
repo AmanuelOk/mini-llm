@@ -5,7 +5,7 @@ from model import MiniGPT
 from config import *
 from dataloader import get_dataloader
 from spm_tokenizer import SPTokenizer
-
+import re
 os.makedirs("checkpoints/tigrinya", exist_ok=True)
 
 tokenizer = SPTokenizer("checkpoints/tigrinya/spm.model")
@@ -20,29 +20,29 @@ model = MiniGPT(
 
 optimizer = torch.optim.AdamW(model.parameters(), lr=LR)
 
-text = open("data/tigrinya.txt", "r", encoding="utf-8").read()
+text = open("data/bible.txt", "r", encoding="utf-8").read()
 
 # -----------------------------
 # Train / validation split
 # -----------------------------
-# split_idx = int(len(text) * 0.9)
+examples = re.split(r"\ns*\n", text)
+random.seed(42)
 
-# train_text = text[:split_idx]
-# val_text = text[split_idx:]
+random.shuffle(examples)
 
-# train_loader = get_dataloader(
-#     text=train_text,
-#     tokenizer=tokenizer,
-#     block_size=BLOCK_SIZE,
-#     batch_size=BATCH_SIZE
-# )
+examples = [ex.strip() for ex in examples if ex.strip()]
+split_idx = int(len(examples) * 0.9)
 
-# val_loader = get_dataloader(
-#     text=val_text,
-#     tokenizer=tokenizer,
-#     block_size=BLOCK_SIZE,
-#     batch_size=BATCH_SIZE
-# )
+val_examples = examples[split_idx:]
+
+val_loader = get_dataloader(
+    examples=val_examples,
+    tokenizer=tokenizer,
+    block_size=BLOCK_SIZE,
+    batch_size=BATCH_SIZE
+    )
+train_examples = examples[:split_idx]
+
 
 checkpoint_path = "checkpoints/tigrinya/latest.pt"
 best_checkpoint_path = "checkpoints/tigrinya/best.pt"
@@ -86,40 +86,14 @@ model.train()
 
 MAX_STEPS = 20000 + start_step
 step = start_step
-
-while step < MAX_STEPS:
-    examples = text.split("<eos>")
-
-    examples = [
-        ex.strip() + " <eos>"
-        for ex in examples
-        if ex.strip()
-    ]
-
-    random.shuffle(examples)
-
-    shuffled_text = "\n".join(examples)
-    # -----------------------------
-    # Train / validation split
-    # -----------------------------
-    split_idx = int(len(text) * 0.9)
-
-    train_text = shuffled_text[:split_idx]
-    val_text = shuffled_text[split_idx:]
-
-    train_loader = get_dataloader(
-    train_text,
-    tokenizer,
-    BLOCK_SIZE,
-    BATCH_SIZE
+train_loader = get_dataloader(
+    examples=train_examples,
+    tokenizer=tokenizer,
+    block_size=BLOCK_SIZE,
+    batch_size=BATCH_SIZE
     )
-    val_loader = get_dataloader(
-        text=val_text,
-        tokenizer=tokenizer,
-        block_size=BLOCK_SIZE,
-        batch_size=BATCH_SIZE
-        )
-   
+while step < MAX_STEPS:
+
     for x, y in train_loader:
         x, y = x.to(DEVICE), y.to(DEVICE)
 

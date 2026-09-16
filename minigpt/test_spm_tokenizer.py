@@ -1,11 +1,16 @@
 import sentencepiece as spm
+from dataset import GPTDataset
+from dataset_v2 import PretokenizedGPTDataset
+import re
 
-sp = spm.SentencePieceProcessor()
-sp.load("tokenizer/spm.model")
+sp = spm.SentencePieceProcessor(model_file="checkpoints/tigrinya/spm.model")
 
-text = "Hello, how are you?"
-ids = sp.encode(text, out_type=int)
-decoded = sp.decode(ids)
+tigrinya_text = ["ኣብ መጀመርታ ኣምላኽ ሰማይን ምድርን ፈጠረ።","ምድሪ ድማ ኣልቦን ባዶን ነበረት።"]
+block_size = 8
 
-print(ids)
-print(decoded)
+dataset = PretokenizedGPTDataset(tigrinya_text, sp, block_size=block_size)
+
+x, y = dataset[0]
+print(x)
+
+
